@@ -1,0 +1,7 @@
+export const ALERT='ALERT'
+export const REFETCH='REFETCH'
+export const  NEWMESSAGE='NEWMESSAGE'
+export const NEW_MESSAGE_ALERT='NEW_MESSAGE_ALERT'
+export const NEW_REQUEST='NEW_REQUEST'
+export const NEW_NOTIFICATION="NEW_NOTIFICATION"
+export const NEW_CHAT='NEW_CHAT'
