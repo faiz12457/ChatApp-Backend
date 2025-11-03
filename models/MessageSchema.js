@@ -1,5 +1,6 @@
 import { Schema, model } from "mongoose";
 
+
 const messageSchema = new Schema(
   {
     sender: {
@@ -25,8 +26,21 @@ const messageSchema = new Schema(
       {
         public_id: String,
         url: String,
+        format: String,
       },
     ],
+
+    deletedFor: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+
+    deleteForEveryOne: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );

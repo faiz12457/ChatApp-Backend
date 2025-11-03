@@ -1,4 +1,5 @@
 import { REFETCH } from "../../constraint/event.js";
+import { ChatParticipant } from "../../models/ChatParticipants.js";
 import { Chat } from "../../models/ChatSchema.js";
 import { Request } from "../../models/RequestSchema.js";
 import { emitEvent } from "../../utils/emitEvent.js";
@@ -34,15 +35,19 @@ export const acceptRequestController = async (req, res) => {
       participants,
     });
 
+    await ChatParticipant.insertMany(
+      participants.map((id) => ({ chatId: chat._id, userId: id }))
+    );
+
     await request.deleteOne();
-       chat =await chat.populate("participants")
+    chat = await chat.populate("participants");
     emitEvent(req, REFETCH, participants);
 
     return res.status(200).json({
       success: true,
       message: "Friend Request accepted",
       senderId: request.sender._id,
-      chat
+      chat,
     });
   } catch (error) {
     return res.status(500).json({ message: error.message });

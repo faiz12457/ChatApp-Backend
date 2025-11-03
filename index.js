@@ -14,7 +14,7 @@ import authRoute from "./routes/authRoutes.js";
 import userRoute from "./routes/userRoutes.js"
 import chatRoutes from "./routes/chatRoutes.js"
 import adminRoutes from "./routes/adminRoutes.js"
-import { NEW_CHAT, NEW_MESSAGE_ALERT, NEW_NOTIFICATION, NEWMESSAGE } from './constraint/event.js'
+import { DELETED_MESSAGE, NEW_CHAT, NEW_GROUP_CHAT, NEW_MESSAGE_ALERT, NEW_NOTIFICATION, NEW_NOTIFICATION_ALERT, NEWMESSAGE } from './constraint/event.js'
 import { v4 as uuid } from 'uuid'
 import { getSockets } from './utils/getSockets.js'
 import { userSocketIds } from './utils/store.js'
@@ -78,6 +78,7 @@ const io=new Server(server,{
 
 
 
+
 io.on("connection", (socket) => {
 
   const user=socket.user;
@@ -85,11 +86,12 @@ io.on("connection", (socket) => {
 userSocketIds.set(user.id.toString(),socket.id)
 
 
- socket.on(NEWMESSAGE,async({participants,message})=>{
+ socket.on(NEWMESSAGE,async({participants,message,chatId})=>{
 
    const membersSocketsIds= getSockets(participants);
-  io.to(membersSocketsIds).emit(NEWMESSAGE,message);
-  io.to(membersSocketsIds).emit(NEW_MESSAGE_ALERT,message.chat)
+  socket.to(membersSocketsIds).emit(NEWMESSAGE,{message,chatId});
+  socket.to(membersSocketsIds).emit(NEW_MESSAGE_ALERT,message.chat);
+
 
  })
 
@@ -99,6 +101,7 @@ userSocketIds.set(user.id.toString(),socket.id)
   const membersSocketsIds= getSockets([id]);
 
   socket.to(membersSocketsIds).emit(NEW_NOTIFICATION,request)
+  socket.to(membersSocketsIds).emit(NEW_NOTIFICATION_ALERT,request);
 
  })
 
@@ -106,13 +109,28 @@ userSocketIds.set(user.id.toString(),socket.id)
  socket.on(NEW_CHAT,(data)=>{
   const participants=data.participants.map((p)=>p._id)
    const membersSocketsIds= getSockets(participants);
- // console.log(data);
+  
 
   
   io.to(membersSocketsIds).emit(NEW_CHAT,data)
  })
 
 
+ socket.on(NEW_GROUP_CHAT,(chat)=>{
+const participants=chat.participants.map((p)=>p._id)
+   const membersSocketsIds= getSockets(participants); 
+  io.to(membersSocketsIds).emit(NEW_CHAT,chat)
+
+ })
+
+
+ socket.on(DELETED_MESSAGE,(data)=>{
+
+  const participants=data.participants.map((p)=>p._id)
+   const membersSocketsIds= getSockets(participants); 
+   socket.to(membersSocketsIds).emit(DELETED_MESSAGE,data)
+
+ })
 
   socket.on("disconnect",()=>{
       userSocketIds.delete(user.id.toString())

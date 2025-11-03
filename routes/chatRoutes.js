@@ -13,6 +13,9 @@ import { getChatDetailsController } from "../controllers/chatControllers/getChat
 import { renameGroupController } from "../controllers/chatControllers/renameGroupController.js";
 import { deleteGroupChatController } from "../controllers/chatControllers/deleteGroupChatController.js";
 import { leaveChatController } from "../controllers/chatControllers/leaveChatController.js";
+import { markChatAsReadController } from "../controllers/chatControllers/markChatAsReadController.js";
+import { deletedForMeController } from "../controllers/chatControllers/deleteForMeController.js";
+import { deleteForEveryOneController } from "../controllers/chatControllers/deleteForEveryOneController.js";
 
 
 const router=express.Router();
@@ -27,7 +30,9 @@ router.post("/newChat",createChatController);
 router.post("/removeGroupMember",removeMemberController);
 router.get("/getMessages/:chatId",getMessagesController);
 router.delete("/leave/:id",leaveChatController)
-
+router.post("/read/:chatId",markChatAsReadController)
+router.delete("/deleteForMe/:id",deletedForMeController);
+router.delete("/deleteForEveryOne/:id",deleteForEveryOneController);
 
 router.route("/:id").get(getChatDetailsController).put(renameGroupController).delete(deleteGroupChatController)
 

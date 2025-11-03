@@ -10,6 +10,11 @@ const chatSchema = new Schema({
     default: false,
   },
 
+  groupChatPic:{
+    url:String,
+    public_id:String
+  },
+
   creater: {
     type: Schema.Types.ObjectId,
     ref: "User",

@@ -1,15 +1,17 @@
+import { ChatParticipant } from "../../models/ChatParticipants.js";
 import { Chat } from "../../models/ChatSchema.js";
 
 export const createChatController = async (req, res) => {
   try {
-    const { member } = req.body; 
+    const { member } = req.body;
     const creater = req.user._id;
 
     if (!member) {
-      return res.status(400).json({ success: false, message: "Member ID is required" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Member ID is required" });
     }
 
-   
     let existingChat = await Chat.findOne({
       IsGroupChat: false,
       participants: { $all: [creater, member] },
@@ -24,20 +26,27 @@ export const createChatController = async (req, res) => {
     }
 
     const newChat = await Chat.create({
-      name: "private", 
+      name: "private",
       creater,
       participants: [creater, member],
       IsGroupChat: false,
     });
 
-    const populatedChat = await Chat.findById(newChat._id).populate("participants", "name email avatar");
+    const populatedChat = await Chat.findById(newChat._id).populate(
+      "participants",
+      "userName email avatar"
+    );
+
+  await ChatParticipant.insertMany([
+  { chatId: populatedChat._id, userId: req.user._id },
+  { chatId: populatedChat._id, userId: member },
+]);
 
     return res.status(201).json({
       success: true,
       message: "New chat created successfully",
       chat: populatedChat,
     });
-
   } catch (error) {
     console.error("Error creating chat:", error);
     return res.status(500).json({

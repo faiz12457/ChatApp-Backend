@@ -1,3 +1,4 @@
+import { type } from "os";
 import { NEW_MESSAGE_ALERT, NEWMESSAGE } from "../../constraint/event.js";
 import { uploadOnCloudinary } from "../../fileUploads/cloudnary.js";
 import { Chat } from "../../models/ChatSchema.js";
@@ -24,7 +25,7 @@ export const newMessageController = async (req, res) => {
     let attachments = [];
     if (req.files && req.files.length > 0) {
       const paths = req.files.map((file) => file.path);
-
+   
       const uploadResults = await Promise.all(
         paths.map((path) => uploadOnCloudinary(path))
       );
@@ -32,11 +33,15 @@ export const newMessageController = async (req, res) => {
       attachments = uploadResults.map((data) => ({
         url: data.url,
         public_id: data.public_id,
+        format:data.format,
+        
       }));
+
+      
     }
-
+     
     
-
+      
   
     let message = new Message({
       sender,
@@ -46,17 +51,19 @@ export const newMessageController = async (req, res) => {
       status:'sent'
     });
 
+
     await message.save();
 
        message = await message.populate("sender", "userName email profilePic");
+       
   //  message = await message.populate("chat");
-
+ 
+  //   console.log(message)
   //emitEvent(req,NEWMESSAGE,existingChat.participants,{message,chatId:chat});
  // emitEvent(req,NEW_MESSAGE_ALERT,existingChat.participants,{chatId:chat})
-
+ 
     return res.status(200).json({
       success: true,
-      message: "Message sent successfully",
        message,
     });
   } catch (error) {
